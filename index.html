@@ -6,7 +6,6 @@
   <title>Military Levy and Logistics Simulator</title>
   <style>
     :root {
-      color-scheme: light;
       --bg: #f6f7fb;
       --card: #ffffff;
       --ink: #1e2430;
@@ -16,6 +15,99 @@
       --border: #d6dbe7;
       --warning: #a33a2c;
       --success: #1f6b3b;
+      --highlight: #eef2ff;
+      --shadow: rgba(15, 23, 42, 0.08);
+      --slider-track: #dfe6f7;
+      --slider-thumb: #2b5fd9;
+      --gradient: linear-gradient(135deg, rgba(43, 95, 217, 0.2), rgba(96, 165, 250, 0.05));
+    }
+
+    body[data-theme="light-slate"] {
+      color-scheme: light;
+    }
+
+    body[data-theme="light-emerald"] {
+      color-scheme: light;
+      --bg: #f2fbf6;
+      --card: #ffffff;
+      --ink: #1c2c24;
+      --muted: #54685f;
+      --accent: #0f7b5a;
+      --accent-soft: rgba(15, 123, 90, 0.12);
+      --border: #cfe3d9;
+      --highlight: #e7f7ef;
+      --slider-track: #d7efe4;
+      --slider-thumb: #0f7b5a;
+      --gradient: linear-gradient(135deg, rgba(15, 123, 90, 0.2), rgba(52, 211, 153, 0.08));
+    }
+
+    body[data-theme="light-rose"] {
+      color-scheme: light;
+      --bg: #fff5f7;
+      --card: #ffffff;
+      --ink: #351f28;
+      --muted: #6c515b;
+      --accent: #c0264b;
+      --accent-soft: rgba(192, 38, 75, 0.12);
+      --border: #f0c8d4;
+      --highlight: #ffe6ec;
+      --slider-track: #f7d7e1;
+      --slider-thumb: #c0264b;
+      --gradient: linear-gradient(135deg, rgba(192, 38, 75, 0.2), rgba(251, 113, 133, 0.08));
+    }
+
+    body[data-theme="dark-indigo"] {
+      color-scheme: dark;
+      --bg: #0f172a;
+      --card: #121c34;
+      --ink: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #7c8cff;
+      --accent-soft: rgba(124, 140, 255, 0.16);
+      --border: #24304f;
+      --warning: #f87171;
+      --success: #4ade80;
+      --highlight: #1a2542;
+      --shadow: rgba(8, 11, 20, 0.6);
+      --slider-track: #1f2a4a;
+      --slider-thumb: #7c8cff;
+      --gradient: linear-gradient(135deg, rgba(124, 140, 255, 0.25), rgba(30, 58, 138, 0.12));
+    }
+
+    body[data-theme="dark-teal"] {
+      color-scheme: dark;
+      --bg: #0f1f24;
+      --card: #13272d;
+      --ink: #e6f2f2;
+      --muted: #91aab0;
+      --accent: #2dd4bf;
+      --accent-soft: rgba(45, 212, 191, 0.15);
+      --border: #214047;
+      --warning: #f97316;
+      --success: #22c55e;
+      --highlight: #17343b;
+      --shadow: rgba(5, 15, 20, 0.65);
+      --slider-track: #1f3a40;
+      --slider-thumb: #2dd4bf;
+      --gradient: linear-gradient(135deg, rgba(45, 212, 191, 0.3), rgba(13, 148, 136, 0.12));
+    }
+
+    body[data-theme="dark-amber"] {
+      color-scheme: dark;
+      --bg: #1b160f;
+      --card: #251d13;
+      --ink: #fef3c7;
+      --muted: #c4b59b;
+      --accent: #f59e0b;
+      --accent-soft: rgba(245, 158, 11, 0.18);
+      --border: #3b2f1a;
+      --warning: #fb7185;
+      --success: #84cc16;
+      --highlight: #2d2316;
+      --shadow: rgba(10, 8, 4, 0.65);
+      --slider-track: #3b2f1a;
+      --slider-thumb: #f59e0b;
+      --gradient: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(251, 191, 36, 0.1));
     }
 
     * {
@@ -31,6 +123,7 @@
 
     header {
       padding: 24px 32px 12px;
+      background: var(--gradient);
     }
 
     header h1 {
@@ -54,7 +147,7 @@
       background: var(--card);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 8px 24px var(--shadow);
       border: 1px solid var(--border);
     }
 
@@ -75,12 +168,12 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px 14px;
-      background: #fbfcff;
+      background: var(--highlight);
       margin-bottom: 12px;
     }
 
     details[open] {
-      background: #fff;
+      background: var(--card);
     }
 
     summary {
@@ -113,7 +206,7 @@
       padding: 8px 10px;
       font-size: 14px;
       color: var(--ink);
-      background: #fff;
+      background: var(--card);
     }
 
     input[type="number"] {
@@ -134,6 +227,30 @@
       border: 1px solid var(--accent);
     }
 
+    .theme-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .theme-button {
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+
+    .theme-button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
     .preset-bar {
       display: flex;
       flex-wrap: wrap;
@@ -150,6 +267,106 @@
     .output-grid {
       display: grid;
       gap: 16px;
+    }
+
+    .visual-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .visual-card {
+      background: var(--highlight);
+      border-radius: 14px;
+      padding: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .visual-card h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .progress-track {
+      height: 10px;
+      background: var(--slider-track);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), rgba(255, 255, 255, 0.15));
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .ring {
+      --ring-size: 94px;
+      width: var(--ring-size);
+      height: var(--ring-size);
+      border-radius: 50%;
+      background: conic-gradient(var(--accent) var(--ring-progress, 0deg), var(--slider-track) 0deg);
+      display: grid;
+      place-items: center;
+      margin: 6px auto 12px;
+    }
+
+    .ring span {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .stacked-bar {
+      display: grid;
+      grid-template-columns: var(--infantry, 1fr) var(--archers, 1fr) var(--cavalry, 1fr) var(--specialists, 1fr);
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .stacked-bar div:nth-child(1) { background: #4f7df7; }
+    .stacked-bar div:nth-child(2) { background: #22c55e; }
+    .stacked-bar div:nth-child(3) { background: #f59e0b; }
+    .stacked-bar div:nth-child(4) { background: #f97316; }
+
+    .mini-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent);
+      height: 4px;
+      background: var(--slider-track);
+    }
+
+    .slider-value {
+      min-width: 42px;
+      text-align: right;
+      font-size: 12px;
+      color: var(--muted);
     }
 
     .output-card h3 {
@@ -205,10 +422,18 @@
     }
   </style>
 </head>
-<body>
+<body data-theme="light-slate">
   <header>
     <h1>Military Levy and Logistics Simulator</h1>
     <p>This tool models the structural limits of military power in a pre-modern society through deterministic, transparent calculations.</p>
+    <div class="theme-bar" id="theme-bar">
+      <button class="theme-button active" type="button" data-theme="light-slate">Light Slate</button>
+      <button class="theme-button" type="button" data-theme="light-emerald">Light Emerald</button>
+      <button class="theme-button" type="button" data-theme="light-rose">Light Rose</button>
+      <button class="theme-button" type="button" data-theme="dark-indigo">Dark Indigo</button>
+      <button class="theme-button" type="button" data-theme="dark-teal">Dark Teal</button>
+      <button class="theme-button" type="button" data-theme="dark-amber">Dark Amber</button>
+    </div>
   </header>
 
   <main>
@@ -231,7 +456,10 @@
           </label>
           <label>
             Urban population (%)
-            <input id="urban-percent" type="number" min="0" max="100" step="1" value="18" />
+            <div class="slider-row">
+              <input id="urban-percent" type="range" min="0" max="100" step="1" value="18" />
+              <span class="slider-value" data-output-for="urban-percent">18%</span>
+            </div>
           </label>
           <label>
             Season
@@ -260,7 +488,10 @@
           </label>
           <label>
             Mobilization rate (%)
-            <input id="mobilization-rate" type="number" min="0" max="30" step="0.1" value="6" />
+            <div class="slider-row">
+              <input id="mobilization-rate" type="range" min="0" max="30" step="0.1" value="6" />
+              <span class="slider-value" data-output-for="mobilization-rate">6%</span>
+            </div>
           </label>
           <label>
             Standing army size
@@ -289,19 +520,31 @@
         <div class="field-grid">
           <label>
             Infantry (%)
-            <input id="infantry-percent" type="number" min="0" max="100" value="55" />
+            <div class="slider-row">
+              <input id="infantry-percent" type="range" min="0" max="100" value="55" />
+              <span class="slider-value" data-output-for="infantry-percent">55%</span>
+            </div>
           </label>
           <label>
             Archers (%)
-            <input id="archers-percent" type="number" min="0" max="100" value="20" />
+            <div class="slider-row">
+              <input id="archers-percent" type="range" min="0" max="100" value="20" />
+              <span class="slider-value" data-output-for="archers-percent">20%</span>
+            </div>
           </label>
           <label>
             Cavalry (%)
-            <input id="cavalry-percent" type="number" min="0" max="100" value="15" />
+            <div class="slider-row">
+              <input id="cavalry-percent" type="range" min="0" max="100" value="15" />
+              <span class="slider-value" data-output-for="cavalry-percent">15%</span>
+            </div>
           </label>
           <label>
             Specialists (%)
-            <input id="specialists-percent" type="number" min="0" max="100" value="10" />
+            <div class="slider-row">
+              <input id="specialists-percent" type="range" min="0" max="100" value="10" />
+              <span class="slider-value" data-output-for="specialists-percent">10%</span>
+            </div>
           </label>
           <label>
             Equipment level
@@ -382,11 +625,17 @@
         <div class="field-grid">
           <label>
             Campaign distance (km)
-            <input id="distance" type="number" min="10" step="10" value="320" />
+            <div class="slider-row">
+              <input id="distance" type="range" min="10" max="800" step="10" value="320" />
+              <span class="slider-value" data-output-for="distance">320 km</span>
+            </div>
           </label>
           <label>
             Duration (days)
-            <input id="duration" type="number" min="1" step="1" value="60" />
+            <div class="slider-row">
+              <input id="duration" type="range" min="1" max="180" step="1" value="60" />
+              <span class="slider-value" data-output-for="duration">60 d</span>
+            </div>
           </label>
           <label>
             Climate harshness
@@ -420,19 +669,31 @@
         <div class="field-grid">
           <label>
             Logistics efficiency multiplier
-            <input id="logistics-efficiency" type="number" min="0.5" max="1.5" step="0.05" value="1.0" />
+            <div class="slider-row">
+              <input id="logistics-efficiency" type="range" min="0.5" max="1.5" step="0.05" value="1.0" />
+              <span class="slider-value" data-output-for="logistics-efficiency">1.0x</span>
+            </div>
           </label>
           <label>
             Urban levy factor
-            <input id="urban-levy" type="number" min="0.2" max="1" step="0.05" value="0.6" />
+            <div class="slider-row">
+              <input id="urban-levy" type="range" min="0.2" max="1" step="0.05" value="0.6" />
+              <span class="slider-value" data-output-for="urban-levy">0.6x</span>
+            </div>
           </label>
           <label>
             Rural levy factor
-            <input id="rural-levy" type="number" min="0.5" max="1.2" step="0.05" value="1.0" />
+            <div class="slider-row">
+              <input id="rural-levy" type="range" min="0.5" max="1.2" step="0.05" value="1.0" />
+              <span class="slider-value" data-output-for="rural-levy">1.0x</span>
+            </div>
           </label>
           <label>
             Supply buffer days
-            <input id="supply-buffer" type="number" min="1" max="15" step="1" value="4" />
+            <div class="slider-row">
+              <input id="supply-buffer" type="range" min="1" max="15" step="1" value="4" />
+              <span class="slider-value" data-output-for="supply-buffer">4 d</span>
+            </div>
           </label>
         </div>
       </details>
@@ -443,6 +704,47 @@
         <h2>Outputs</h2>
         <span class="tag" id="realm-label"></span>
       </div>
+      <div class="visual-grid">
+        <div class="visual-card">
+          <h4>Mobilization Gauge</h4>
+          <div class="ring" id="mobilization-ring"><span id="mobilization-ring-label">0%</span></div>
+          <div class="progress-label">
+            <span>Mobilized</span>
+            <span id="mobilization-ratio">0%</span>
+          </div>
+        </div>
+        <div class="visual-card">
+          <h4>Troop Composition</h4>
+          <div class="stacked-bar" id="composition-bar">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <div class="mini-tags" id="composition-tags"></div>
+        </div>
+        <div class="visual-card">
+          <h4>Supply Balance</h4>
+          <div class="progress-track">
+            <div class="progress-bar" id="supply-bar"></div>
+          </div>
+          <div class="progress-label">
+            <span>Local supply</span>
+            <span id="supply-percent-label">0%</span>
+          </div>
+        </div>
+        <div class="visual-card">
+          <h4>Operational Reach</h4>
+          <div class="progress-track">
+            <div class="progress-bar" id="range-bar"></div>
+          </div>
+          <div class="progress-label">
+            <span id="range-label">0 km</span>
+            <span id="speed-label">0 km/day</span>
+          </div>
+        </div>
+      </div>
+
       <div class="output-grid">
         <div class="output-card">
           <h3>Levy Summary</h3>
@@ -655,11 +957,29 @@
       rangeNoDepot: document.getElementById("range-no-depot"),
       rangeWithDepot: document.getElementById("range-with-depot"),
       travelSpeed: document.getElementById("travel-speed"),
-      speedModifiers: document.getElementById("speed-modifiers")
+      speedModifiers: document.getElementById("speed-modifiers"),
+      mobilizationRing: document.getElementById("mobilization-ring"),
+      mobilizationRingLabel: document.getElementById("mobilization-ring-label"),
+      mobilizationRatio: document.getElementById("mobilization-ratio"),
+      compositionBar: document.getElementById("composition-bar"),
+      compositionTags: document.getElementById("composition-tags"),
+      supplyBar: document.getElementById("supply-bar"),
+      supplyPercentLabel: document.getElementById("supply-percent-label"),
+      rangeBar: document.getElementById("range-bar"),
+      rangeLabel: document.getElementById("range-label"),
+      speedLabel: document.getElementById("speed-label")
     };
 
     const compositionWarning = document.getElementById("composition-warning");
     const compositionTotal = document.getElementById("composition-total");
+    const themeBar = document.getElementById("theme-bar");
+
+    const sliderOutputs = new Map(
+      Array.from(document.querySelectorAll("[data-output-for]")).map((element) => [
+        element.dataset.outputFor,
+        element
+      ])
+    );
 
     const safeNumber = (value) => Number.parseFloat(value) || 0;
 
@@ -890,11 +1210,58 @@
 
       compositionTotal.textContent = Math.round(composition.totalPercent);
       compositionWarning.hidden = Math.round(composition.totalPercent) === 100;
+
+      const mobilizationRatio = Math.min(1, Math.max(0, adjustedLevy / Math.max(1, config.totalPopulation)));
+      const ringDegrees = Math.round(mobilizationRatio * 360);
+      outputs.mobilizationRing.style.setProperty("--ring-progress", `${ringDegrees}deg`);
+      outputs.mobilizationRingLabel.textContent = `${Math.round(mobilizationRatio * 100)}%`;
+      outputs.mobilizationRatio.textContent = `${(mobilizationRatio * 100).toFixed(1)}% of population`;
+
+      outputs.compositionBar.style.setProperty("--infantry", Math.max(0, composition.infantry));
+      outputs.compositionBar.style.setProperty("--archers", Math.max(0, composition.archers));
+      outputs.compositionBar.style.setProperty("--cavalry", Math.max(0, composition.cavalry));
+      outputs.compositionBar.style.setProperty("--specialists", Math.max(0, composition.specialists));
+      outputs.compositionTags.innerHTML = `
+        Infantry ${Math.round((composition.infantry / adjustedLevy) * 100) || 0}%
+        · Archers ${Math.round((composition.archers / adjustedLevy) * 100) || 0}%
+        · Cavalry ${Math.round((composition.cavalry / adjustedLevy) * 100) || 0}%
+        · Specialists ${Math.round((composition.specialists / adjustedLevy) * 100) || 0}%
+      `;
+
+      outputs.supplyBar.style.width = `${Math.round(result.localSupplyPercent * 100)}%`;
+      outputs.supplyPercentLabel.textContent = `${Math.round(result.localSupplyPercent * 100)}%`;
+
+      const rangeRatio = Math.min(1, result.range.maxDistanceWithDepots / Math.max(1, config.distance));
+      outputs.rangeBar.style.width = `${Math.round(rangeRatio * 100)}%`;
+      outputs.rangeLabel.textContent = `${formatNumber(result.range.maxDistanceWithDepots)} km max`;
+      outputs.speedLabel.textContent = `${result.range.speed.toFixed(1)} km/day`;
+    }
+
+    function updateSliderLabel(id, value) {
+      const output = sliderOutputs.get(id);
+      if (!output) return;
+      let suffix = "";
+      if (id.includes("percent")) suffix = "%";
+      if (id === "distance") suffix = " km";
+      if (id === "duration") suffix = " d";
+      if (id === "supply-buffer") suffix = " d";
+      if (["logistics-efficiency", "urban-levy", "rural-levy"].includes(id)) suffix = "x";
+      output.textContent = `${value}${suffix}`;
+    }
+
+    function updateAllSliderLabels() {
+      sliderOutputs.forEach((_, id) => {
+        const element = document.getElementById(id);
+        if (element) {
+          updateSliderLabel(id, element.value);
+        }
+      });
     }
 
     function updateAll() {
       const result = calculateOutputs();
       updateOutputUI(result);
+      updateAllSliderLabels();
       window.latestResults = result;
     }
 
@@ -918,6 +1285,16 @@
       link.download = `${data.config.realmName.replace(/\s+/g, "_").toLowerCase()}_logistics.json`;
       link.click();
       URL.revokeObjectURL(link.href);
+    });
+
+    themeBar.addEventListener("click", (event) => {
+      if (event.target.matches("[data-theme]")) {
+        const selectedTheme = event.target.dataset.theme;
+        document.body.dataset.theme = selectedTheme;
+        themeBar.querySelectorAll(".theme-button").forEach((button) => {
+          button.classList.toggle("active", button.dataset.theme === selectedTheme);
+        });
+      }
     });
 
     updateAll();
