@@ -1,1 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Military Levy and Logistics Simulator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --ink: #1e2430;
+      --muted: #5c6573;
+      --accent: #2b5fd9;
+      --accent-soft: rgba(43, 95, 217, 0.12);
+      --border: #d6dbe7;
+      --warning: #a33a2c;
+      --success: #1f6b3b;
+    }
 
+    * {
+      box-sizing: border-box;
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    header {
+      padding: 24px 32px 12px;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) minmax(340px, 1fr);
+      gap: 24px;
+      padding: 16px 32px 32px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    details {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #fbfcff;
+      margin-bottom: 12px;
+    }
+
+    details[open] {
+      background: #fff;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    button,
+    textarea {
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 14px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    input[type="number"] {
+      width: 100%;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .preset-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .warning {
+      color: var(--warning);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .output-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .output-card h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .output-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .output-row span {
+      color: var(--muted);
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    textarea {
+      min-height: 120px;
+      width: 100%;
+      resize: vertical;
+      font-family: "SF Mono", "Consolas", monospace;
+      font-size: 12px;
+    }
+
+    footer {
+      padding: 0 32px 32px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Military Levy and Logistics Simulator</h1>
+    <p>This tool models the structural limits of military power in a pre-modern society through deterministic, transparent calculations.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="section-title">
+        <h2>Inputs</h2>
+        <button id="export-json" class="secondary" type="button">Export Results JSON</button>
+      </div>
+
+      <details open>
+        <summary>Realm Population</summary>
+        <div class="field-grid">
+          <label>
+            Realm name
+            <input id="realm-name" type="text" value="Ironvale Dominion" />
+          </label>
+          <label>
+            Total population
+            <input id="total-population" type="number" min="100" step="100" value="2400000" />
+          </label>
+          <label>
+            Urban population (%)
+            <input id="urban-percent" type="number" min="0" max="100" step="1" value="18" />
+          </label>
+          <label>
+            Season
+            <select id="season">
+              <option value="spring">Spring</option>
+              <option value="summer" selected>Summer</option>
+              <option value="autumn">Autumn</option>
+              <option value="winter">Winter</option>
+            </select>
+          </label>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Military System</summary>
+        <div class="field-grid">
+          <label>
+            Preset
+            <select id="preset">
+              <option value="feudal_levy">Feudal levy</option>
+              <option value="centralized_empire" selected>Centralized empire</option>
+              <option value="city_state_militia">City-state militia</option>
+              <option value="nomadic_host">Nomadic host</option>
+              <option value="mercenary_realm">Mercenary realm</option>
+            </select>
+          </label>
+          <label>
+            Mobilization rate (%)
+            <input id="mobilization-rate" type="number" min="0" max="30" step="0.1" value="6" />
+          </label>
+          <label>
+            Standing army size
+            <input id="standing-army" type="number" min="0" step="100" value="22000" />
+          </label>
+          <label>
+            Army quality
+            <select id="army-quality">
+              <option value="militia">Militia</option>
+              <option value="regular" selected>Regular</option>
+              <option value="professional">Professional</option>
+            </select>
+          </label>
+        </div>
+        <div class="preset-bar" id="preset-buttons">
+          <button type="button" data-preset="feudal_levy">Feudal levy</button>
+          <button type="button" data-preset="centralized_empire">Centralized empire</button>
+          <button type="button" data-preset="city_state_militia">City-state militia</button>
+          <button type="button" data-preset="nomadic_host">Nomadic host</button>
+          <button type="button" data-preset="mercenary_realm">Mercenary realm</button>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Troop Composition</summary>
+        <div class="field-grid">
+          <label>
+            Infantry (%)
+            <input id="infantry-percent" type="number" min="0" max="100" value="55" />
+          </label>
+          <label>
+            Archers (%)
+            <input id="archers-percent" type="number" min="0" max="100" value="20" />
+          </label>
+          <label>
+            Cavalry (%)
+            <input id="cavalry-percent" type="number" min="0" max="100" value="15" />
+          </label>
+          <label>
+            Specialists (%)
+            <input id="specialists-percent" type="number" min="0" max="100" value="10" />
+          </label>
+          <label>
+            Equipment level
+            <select id="equipment-level">
+              <option value="light">Light</option>
+              <option value="medium" selected>Medium</option>
+              <option value="heavy">Heavy</option>
+            </select>
+          </label>
+        </div>
+        <p id="composition-warning" class="warning" hidden>Percentages must sum to 100%. Current total: <span id="composition-total">0</span>%.</p>
+      </details>
+
+      <details>
+        <summary>Logistics &amp; Supply</summary>
+        <div class="field-grid">
+          <label>
+            Ration kg per soldier/day
+            <input id="ration-kg" type="number" min="0.5" step="0.1" value="1.6" />
+          </label>
+          <label>
+            Transport mode
+            <select id="transport-mode">
+              <option value="pack_animals">Pack animals</option>
+              <option value="wagons">Wagons</option>
+              <option value="mixed" selected>Mixed</option>
+            </select>
+          </label>
+          <label>
+            Transport capacity per unit (kg)
+            <input id="transport-capacity" type="number" min="50" step="10" value="240" />
+          </label>
+          <label>
+            Forage availability
+            <select id="forage">
+              <option value="none">None</option>
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+          <label>
+            Territory control
+            <select id="territory">
+              <option value="friendly" selected>Friendly</option>
+              <option value="contested">Contested</option>
+              <option value="hostile">Hostile</option>
+            </select>
+          </label>
+          <label>
+            Road quality
+            <select id="road">
+              <option value="track">Track</option>
+              <option value="road" selected>Road</option>
+              <option value="paved">Paved</option>
+            </select>
+          </label>
+          <label>
+            River transport
+            <select id="river">
+              <option value="false" selected>No</option>
+              <option value="true">Yes</option>
+            </select>
+          </label>
+          <label>
+            Supply depot count
+            <input id="depot-count" type="number" min="0" step="1" value="2" />
+          </label>
+          <label>
+            Depot spacing (km)
+            <input id="depot-spacing" type="number" min="10" step="10" value="140" />
+          </label>
+        </div>
+      </details>
+
+      <details>
+        <summary>Campaign Scenario</summary>
+        <div class="field-grid">
+          <label>
+            Campaign distance (km)
+            <input id="distance" type="number" min="10" step="10" value="320" />
+          </label>
+          <label>
+            Duration (days)
+            <input id="duration" type="number" min="1" step="1" value="60" />
+          </label>
+          <label>
+            Climate harshness
+            <select id="climate">
+              <option value="mild" selected>Mild</option>
+              <option value="harsh">Harsh</option>
+              <option value="extreme">Extreme</option>
+            </select>
+          </label>
+          <label>
+            Disease risk
+            <select id="disease">
+              <option value="low" selected>Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+          <label>
+            Enemy disruption
+            <select id="enemy">
+              <option value="none" selected>None</option>
+              <option value="raids">Raids</option>
+              <option value="severe">Severe</option>
+            </select>
+          </label>
+        </div>
+      </details>
+
+      <details>
+        <summary>Editable Formula Multipliers</summary>
+        <div class="field-grid">
+          <label>
+            Logistics efficiency multiplier
+            <input id="logistics-efficiency" type="number" min="0.5" max="1.5" step="0.05" value="1.0" />
+          </label>
+          <label>
+            Urban levy factor
+            <input id="urban-levy" type="number" min="0.2" max="1" step="0.05" value="0.6" />
+          </label>
+          <label>
+            Rural levy factor
+            <input id="rural-levy" type="number" min="0.5" max="1.2" step="0.05" value="1.0" />
+          </label>
+          <label>
+            Supply buffer days
+            <input id="supply-buffer" type="number" min="1" max="15" step="1" value="4" />
+          </label>
+        </div>
+      </details>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <h2>Outputs</h2>
+        <span class="tag" id="realm-label"></span>
+      </div>
+      <div class="output-grid">
+        <div class="output-card">
+          <h3>Levy Summary</h3>
+          <div class="output-row"><span>Max mobilizable troops</span><strong id="max-mobilizable">0</strong></div>
+          <div class="output-row"><span>Sustainable troops (30 days)</span><strong id="sustain-30">0</strong></div>
+          <div class="output-row"><span>Sustainable troops (60 days)</span><strong id="sustain-60">0</strong></div>
+          <div class="output-row"><span>Sustainable troops (90 days)</span><strong id="sustain-90">0</strong></div>
+          <div class="output-row"><span>Infantry</span><strong id="breakdown-infantry">0</strong></div>
+          <div class="output-row"><span>Archers</span><strong id="breakdown-archers">0</strong></div>
+          <div class="output-row"><span>Cavalry</span><strong id="breakdown-cavalry">0</strong></div>
+          <div class="output-row"><span>Specialists</span><strong id="breakdown-specialists">0</strong></div>
+          <div class="output-row"><span>Militia / Regular / Professional</span><strong id="breakdown-quality">0 / 0 / 0</strong></div>
+        </div>
+
+        <div class="output-card">
+          <h3>Supply &amp; Transport</h3>
+          <div class="output-row"><span>Daily food requirement (kg)</span><strong id="daily-food">0</strong></div>
+          <div class="output-row"><span>Total food requirement</span><strong id="total-food">0</strong></div>
+          <div class="output-row"><span>Transport units required</span><strong id="transport-units">0</strong></div>
+          <div class="output-row"><span>Local supply percent</span><strong id="local-supply">0%</strong></div>
+        </div>
+
+        <div class="output-card">
+          <h3>Attrition &amp; Sustainability</h3>
+          <div class="output-row"><span>Break point day (below 60%)</span><strong id="break-point">0</strong></div>
+          <div class="output-row"><span>Attrition causes</span><strong id="attrition-causes">-</strong></div>
+          <textarea id="attrition-array" readonly></textarea>
+        </div>
+
+        <div class="output-card">
+          <h3>Operational Range</h3>
+          <div class="output-row"><span>Max distance without depots</span><strong id="range-no-depot">0 km</strong></div>
+          <div class="output-row"><span>Max distance with depots</span><strong id="range-with-depot">0 km</strong></div>
+          <div class="output-row"><span>Travel speed</span><strong id="travel-speed">0 km/day</strong></div>
+          <div class="output-row"><span>Speed modifiers</span><strong id="speed-modifiers">-</strong></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>Purpose:</strong> This tool models the structural limits of military power in a pre-modern society, enabling realistic worldbuilding through systemic constraints rather than narrative invention.</p>
+  </footer>
+
+  <script>
+    const numberFormatter = new Intl.NumberFormat("en-US");
+
+    const presetConfig = {
+      feudal_levy: {
+        label: "Feudal levy",
+        mobilization: 1.25,
+        sustain: 0.7,
+        logistics: 0.85,
+        cavalry: 0.9,
+        infantry: 1.1,
+        forage: 0.9
+      },
+      centralized_empire: {
+        label: "Centralized empire",
+        mobilization: 0.95,
+        sustain: 1.15,
+        logistics: 1.2,
+        cavalry: 1.0,
+        infantry: 1.0,
+        forage: 1.05
+      },
+      city_state_militia: {
+        label: "City-state militia",
+        mobilization: 1.1,
+        sustain: 0.8,
+        logistics: 0.9,
+        cavalry: 0.7,
+        infantry: 1.25,
+        forage: 0.9
+      },
+      nomadic_host: {
+        label: "Nomadic host",
+        mobilization: 1.15,
+        sustain: 0.9,
+        logistics: 1.1,
+        cavalry: 1.35,
+        infantry: 0.8,
+        forage: 1.35
+      },
+      mercenary_realm: {
+        label: "Mercenary realm",
+        mobilization: 0.75,
+        sustain: 1.0,
+        logistics: 1.05,
+        cavalry: 1.1,
+        infantry: 0.95,
+        forage: 0.95
+      }
+    };
+
+    const seasonModifiers = {
+      spring: 1.0,
+      summer: 1.05,
+      autumn: 0.9,
+      winter: 0.7
+    };
+
+    const forageTable = {
+      none: 0,
+      low: 0.1,
+      medium: 0.25,
+      high: 0.4
+    };
+
+    const territoryTable = {
+      friendly: 0.15,
+      contested: 0.05,
+      hostile: -0.05
+    };
+
+    const roadSpeed = {
+      track: 0.85,
+      road: 1.0,
+      paved: 1.15
+    };
+
+    const transportSpeed = {
+      pack_animals: 1.05,
+      wagons: 0.9,
+      mixed: 1.0
+    };
+
+    const equipmentSpeed = {
+      light: 1.1,
+      medium: 1.0,
+      heavy: 0.85
+    };
+
+    const climateAttrition = {
+      mild: 0.002,
+      harsh: 0.006,
+      extreme: 0.012
+    };
+
+    const diseaseAttrition = {
+      low: 0.002,
+      medium: 0.006,
+      high: 0.012
+    };
+
+    const enemyAttrition = {
+      none: 0.0,
+      raids: 0.004,
+      severe: 0.01
+    };
+
+    const qualityDistribution = {
+      militia: { militia: 0.7, regular: 0.25, professional: 0.05 },
+      regular: { militia: 0.3, regular: 0.55, professional: 0.15 },
+      professional: { militia: 0.1, regular: 0.4, professional: 0.5 }
+    };
+
+    const inputs = {
+      realmName: document.getElementById("realm-name"),
+      totalPopulation: document.getElementById("total-population"),
+      urbanPercent: document.getElementById("urban-percent"),
+      season: document.getElementById("season"),
+      preset: document.getElementById("preset"),
+      mobilizationRate: document.getElementById("mobilization-rate"),
+      standingArmy: document.getElementById("standing-army"),
+      armyQuality: document.getElementById("army-quality"),
+      infantryPercent: document.getElementById("infantry-percent"),
+      archersPercent: document.getElementById("archers-percent"),
+      cavalryPercent: document.getElementById("cavalry-percent"),
+      specialistsPercent: document.getElementById("specialists-percent"),
+      equipmentLevel: document.getElementById("equipment-level"),
+      rationKg: document.getElementById("ration-kg"),
+      transportMode: document.getElementById("transport-mode"),
+      transportCapacity: document.getElementById("transport-capacity"),
+      forage: document.getElementById("forage"),
+      territory: document.getElementById("territory"),
+      road: document.getElementById("road"),
+      river: document.getElementById("river"),
+      depotCount: document.getElementById("depot-count"),
+      depotSpacing: document.getElementById("depot-spacing"),
+      distance: document.getElementById("distance"),
+      duration: document.getElementById("duration"),
+      climate: document.getElementById("climate"),
+      disease: document.getElementById("disease"),
+      enemy: document.getElementById("enemy"),
+      logisticsEfficiency: document.getElementById("logistics-efficiency"),
+      urbanLevy: document.getElementById("urban-levy"),
+      ruralLevy: document.getElementById("rural-levy"),
+      supplyBuffer: document.getElementById("supply-buffer")
+    };
+
+    const outputs = {
+      realmLabel: document.getElementById("realm-label"),
+      maxMobilizable: document.getElementById("max-mobilizable"),
+      sustain30: document.getElementById("sustain-30"),
+      sustain60: document.getElementById("sustain-60"),
+      sustain90: document.getElementById("sustain-90"),
+      breakdownInfantry: document.getElementById("breakdown-infantry"),
+      breakdownArchers: document.getElementById("breakdown-archers"),
+      breakdownCavalry: document.getElementById("breakdown-cavalry"),
+      breakdownSpecialists: document.getElementById("breakdown-specialists"),
+      breakdownQuality: document.getElementById("breakdown-quality"),
+      dailyFood: document.getElementById("daily-food"),
+      totalFood: document.getElementById("total-food"),
+      transportUnits: document.getElementById("transport-units"),
+      localSupply: document.getElementById("local-supply"),
+      breakPoint: document.getElementById("break-point"),
+      attritionCauses: document.getElementById("attrition-causes"),
+      attritionArray: document.getElementById("attrition-array"),
+      rangeNoDepot: document.getElementById("range-no-depot"),
+      rangeWithDepot: document.getElementById("range-with-depot"),
+      travelSpeed: document.getElementById("travel-speed"),
+      speedModifiers: document.getElementById("speed-modifiers")
+    };
+
+    const compositionWarning = document.getElementById("composition-warning");
+    const compositionTotal = document.getElementById("composition-total");
+
+    const safeNumber = (value) => Number.parseFloat(value) || 0;
+
+    const formatNumber = (value) => numberFormatter.format(Math.round(value));
+
+    function calculateLevyFromPopulation(config) {
+      const ruralPopulation = config.totalPopulation * (1 - config.urbanPercent / 100);
+      const urbanPopulation = config.totalPopulation * (config.urbanPercent / 100);
+      const levyBase =
+        ruralPopulation * config.ruralLevyFactor +
+        urbanPopulation * config.urbanLevyFactor;
+
+      const mobilizationPool = levyBase * (config.mobilizationRate / 100);
+      return Math.max(0, mobilizationPool + config.standingArmy);
+    }
+
+    function applyPresetAndSeasonModifiers(config, baseLevy) {
+      const preset = presetConfig[config.preset];
+      const seasonModifier = seasonModifiers[config.season];
+      const adjustedLevy = baseLevy * preset.mobilization * seasonModifier;
+      const sustainModifier = preset.sustain * config.logisticsEfficiency;
+      return { adjustedLevy, sustainModifier, preset };
+    }
+
+    function splitTroopComposition(config, totalTroops, preset) {
+      const totalPercent =
+        config.infantryPercent +
+        config.archersPercent +
+        config.cavalryPercent +
+        config.specialistsPercent;
+      const normalized = totalPercent === 0 ? 1 : totalPercent;
+      const infantry = totalTroops * (config.infantryPercent / normalized) * preset.infantry;
+      const archers = totalTroops * (config.archersPercent / normalized);
+      const cavalry = totalTroops * (config.cavalryPercent / normalized) * preset.cavalry;
+      const specialists = totalTroops * (config.specialistsPercent / normalized);
+      return {
+        infantry,
+        archers,
+        cavalry,
+        specialists,
+        totalPercent
+      };
+    }
+
+    function computeDailySupply(config, totalTroops) {
+      const rationDemand = totalTroops * config.rationKg;
+      const equipmentPenalty = config.equipmentLevel === "heavy" ? 1.1 : config.equipmentLevel === "light" ? 0.95 : 1.0;
+      return rationDemand * equipmentPenalty;
+    }
+
+    function computeTransportAndSpeed(config, dailyFoodKg) {
+      const transportEfficiency = presetConfig[config.preset].logistics * config.logisticsEfficiency;
+      const capacityPerUnit = config.transportCapacity * transportEfficiency;
+      const transportUnitsRequired = dailyFoodKg / Math.max(1, capacityPerUnit);
+
+      const riverBoost = config.riverTransport ? 1.1 : 1.0;
+      const speed = 20 * roadSpeed[config.road] * transportSpeed[config.transportMode] * equipmentSpeed[config.equipmentLevel] * riverBoost;
+
+      return { transportUnitsRequired, speed };
+    }
+
+    function applyForageAndLocalSupply(config, dailyFoodKg, preset) {
+      const forageGain = forageTable[config.forage] * preset.forage;
+      const territoryGain = territoryTable[config.territory];
+      const localSupplyPercent = Math.max(0, Math.min(0.6, forageGain + territoryGain));
+      const localSupplyKg = dailyFoodKg * localSupplyPercent;
+      return { localSupplyPercent, localSupplyKg };
+    }
+
+    function simulateAttritionOverTime(config, startingTroops, dailyFoodKg, localSupplyKg, duration) {
+      const deficitRatio = Math.max(0, (dailyFoodKg - localSupplyKg) / Math.max(1, dailyFoodKg));
+      const supplyAttrition = deficitRatio * 0.015;
+      const disease = diseaseAttrition[config.disease];
+      const climate = climateAttrition[config.climate];
+      const enemy = enemyAttrition[config.enemy];
+      const dailyAttritionRate = supplyAttrition + disease + climate + enemy;
+
+      const strengthByDay = [];
+      let troops = startingTroops;
+      let breakPointDay = 0;
+      for (let day = 1; day <= duration; day += 1) {
+        troops = troops * (1 - dailyAttritionRate);
+        strengthByDay.push({ day, troops: Math.max(0, Math.round(troops)) });
+        if (!breakPointDay && troops <= startingTroops * 0.6) {
+          breakPointDay = day;
+        }
+      }
+
+      return {
+        strengthByDay,
+        breakPointDay,
+        attritionCauses: {
+          supply_deficit: supplyAttrition,
+          disease,
+          climate,
+          enemy_disruption: enemy
+        }
+      };
+    }
+
+    function calculateOperationalRange(config, dailyFoodKg, transportUnitsRequired, speed) {
+      const bufferDays = Math.max(1, config.supplyBuffer);
+      const carriedDays = Math.max(1, (config.transportCapacity * transportUnitsRequired) / Math.max(1, dailyFoodKg));
+      const totalDays = bufferDays + carriedDays;
+      const maxDistanceWithoutDepots = totalDays * speed;
+      const depotRange = config.depotCount * config.depotSpacing;
+      const maxDistanceWithDepots = maxDistanceWithoutDepots + depotRange;
+
+      return {
+        maxDistanceWithoutDepots,
+        maxDistanceWithDepots,
+        speed
+      };
+    }
+
+    function calculateOutputs() {
+      const config = {
+        realmName: inputs.realmName.value || "Unnamed Realm",
+        totalPopulation: safeNumber(inputs.totalPopulation.value),
+        urbanPercent: safeNumber(inputs.urbanPercent.value),
+        season: inputs.season.value,
+        preset: inputs.preset.value,
+        mobilizationRate: safeNumber(inputs.mobilizationRate.value),
+        standingArmy: safeNumber(inputs.standingArmy.value),
+        armyQuality: inputs.armyQuality.value,
+        infantryPercent: safeNumber(inputs.infantryPercent.value),
+        archersPercent: safeNumber(inputs.archersPercent.value),
+        cavalryPercent: safeNumber(inputs.cavalryPercent.value),
+        specialistsPercent: safeNumber(inputs.specialistsPercent.value),
+        equipmentLevel: inputs.equipmentLevel.value,
+        rationKg: safeNumber(inputs.rationKg.value),
+        transportMode: inputs.transportMode.value,
+        transportCapacity: safeNumber(inputs.transportCapacity.value),
+        forage: inputs.forage.value,
+        territory: inputs.territory.value,
+        road: inputs.road.value,
+        riverTransport: inputs.river.value === "true",
+        depotCount: safeNumber(inputs.depotCount.value),
+        depotSpacing: safeNumber(inputs.depotSpacing.value),
+        distance: safeNumber(inputs.distance.value),
+        duration: safeNumber(inputs.duration.value),
+        climate: inputs.climate.value,
+        disease: inputs.disease.value,
+        enemy: inputs.enemy.value,
+        logisticsEfficiency: safeNumber(inputs.logisticsEfficiency.value),
+        urbanLevyFactor: safeNumber(inputs.urbanLevy.value),
+        ruralLevyFactor: safeNumber(inputs.ruralLevy.value),
+        supplyBuffer: safeNumber(inputs.supplyBuffer.value)
+      };
+
+      const baseLevy = calculateLevyFromPopulation(config);
+      const { adjustedLevy, sustainModifier, preset } = applyPresetAndSeasonModifiers(config, baseLevy);
+      const composition = splitTroopComposition(config, adjustedLevy, preset);
+      const dailyFoodKg = computeDailySupply(config, adjustedLevy);
+      const transportData = computeTransportAndSpeed(config, dailyFoodKg);
+      const forageData = applyForageAndLocalSupply(config, dailyFoodKg, preset);
+      const attrition = simulateAttritionOverTime(
+        config,
+        adjustedLevy,
+        dailyFoodKg,
+        forageData.localSupplyKg,
+        Math.max(1, config.duration)
+      );
+      const range = calculateOperationalRange(config, dailyFoodKg, transportData.transportUnitsRequired, transportData.speed);
+
+      const sustainableTroops = (days) => {
+        const demand = dailyFoodKg * days;
+        const capacity = config.transportCapacity * transportData.transportUnitsRequired * days;
+        const localSupply = forageData.localSupplyKg * days;
+        const sustainPool = ((capacity + localSupply) / Math.max(1, config.rationKg * days)) * sustainModifier;
+        return Math.min(adjustedLevy, sustainPool);
+      };
+
+      const qualitySplit = qualityDistribution[config.armyQuality];
+
+      return {
+        config,
+        baseLevy,
+        adjustedLevy,
+        composition,
+        dailyFoodKg,
+        totalFoodKg: dailyFoodKg * config.duration,
+        transportUnitsRequired: transportData.transportUnitsRequired,
+        localSupplyPercent: forageData.localSupplyPercent,
+        attrition,
+        range,
+        sustainable30: sustainableTroops(30),
+        sustainable60: sustainableTroops(60),
+        sustainable90: sustainableTroops(90),
+        qualitySplit
+      };
+    }
+
+    function updateOutputUI(result) {
+      const { config, composition, adjustedLevy } = result;
+
+      outputs.realmLabel.textContent = config.realmName;
+      outputs.maxMobilizable.textContent = formatNumber(adjustedLevy);
+      outputs.sustain30.textContent = formatNumber(result.sustainable30);
+      outputs.sustain60.textContent = formatNumber(result.sustainable60);
+      outputs.sustain90.textContent = formatNumber(result.sustainable90);
+
+      outputs.breakdownInfantry.textContent = formatNumber(composition.infantry);
+      outputs.breakdownArchers.textContent = formatNumber(composition.archers);
+      outputs.breakdownCavalry.textContent = formatNumber(composition.cavalry);
+      outputs.breakdownSpecialists.textContent = formatNumber(composition.specialists);
+
+      const militiaCount = adjustedLevy * result.qualitySplit.militia;
+      const regularCount = adjustedLevy * result.qualitySplit.regular;
+      const professionalCount = adjustedLevy * result.qualitySplit.professional;
+      outputs.breakdownQuality.textContent = `${formatNumber(militiaCount)} / ${formatNumber(regularCount)} / ${formatNumber(professionalCount)}`;
+
+      outputs.dailyFood.textContent = formatNumber(result.dailyFoodKg);
+      outputs.totalFood.textContent = formatNumber(result.totalFoodKg);
+      outputs.transportUnits.textContent = formatNumber(result.transportUnitsRequired);
+      outputs.localSupply.textContent = `${Math.round(result.localSupplyPercent * 100)}%`;
+
+      outputs.breakPoint.textContent = result.attrition.breakPointDay || "Not reached";
+      outputs.attritionCauses.textContent = Object.entries(result.attrition.attritionCauses)
+        .map(([key, value]) => `${key.replace(/_/g, " ")}: ${(value * 100).toFixed(2)}%/day`)
+        .join(" · ");
+      outputs.attritionArray.value = JSON.stringify(result.attrition.strengthByDay, null, 2);
+
+      outputs.rangeNoDepot.textContent = `${formatNumber(result.range.maxDistanceWithoutDepots)} km`;
+      outputs.rangeWithDepot.textContent = `${formatNumber(result.range.maxDistanceWithDepots)} km`;
+      outputs.travelSpeed.textContent = `${result.range.speed.toFixed(1)} km/day`;
+      outputs.speedModifiers.textContent = `Road x${roadSpeed[config.road]} · Transport x${transportSpeed[config.transportMode]} · Equipment x${equipmentSpeed[config.equipmentLevel]}${config.riverTransport ? " · River x1.1" : ""}`;
+
+      compositionTotal.textContent = Math.round(composition.totalPercent);
+      compositionWarning.hidden = Math.round(composition.totalPercent) === 100;
+    }
+
+    function updateAll() {
+      const result = calculateOutputs();
+      updateOutputUI(result);
+      window.latestResults = result;
+    }
+
+    document.querySelectorAll("input, select").forEach((input) => {
+      input.addEventListener("input", updateAll);
+      input.addEventListener("change", updateAll);
+    });
+
+    document.getElementById("preset-buttons").addEventListener("click", (event) => {
+      if (event.target.matches("button[data-preset]")) {
+        inputs.preset.value = event.target.dataset.preset;
+        updateAll();
+      }
+    });
+
+    document.getElementById("export-json").addEventListener("click", () => {
+      const data = window.latestResults;
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${data.config.realmName.replace(/\s+/g, "_").toLowerCase()}_logistics.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    updateAll();
+  </script>
+</body>
+</html>
